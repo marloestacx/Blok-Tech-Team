@@ -2,8 +2,7 @@ const express = require('express');
 const app = require('express')();
 var socket = require('socket.io');
 var server = require('http').createServer(app);
-server = require('http').createServer(app),
-io = require('socket.io').listen(server)
+
 
 const exphbs = require('express-handlebars');
 // const port = process.env.PORT ;
@@ -58,7 +57,8 @@ app.set("view engine", 'handlebars');
 
 //socket setup
 // var io = socket(server);
-io.on('connection', function(socket) {
+io = require('socket.io').listen(server)
+io.sockets.on('connection', function(socket) {
   console.log('made the socket connection');
 
   //luistert naar de client side of daar een chat bericht van verstuurd wordt
