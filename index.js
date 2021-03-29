@@ -1,15 +1,22 @@
-const express = require('express');
-const app = require('express')();
+// const express = require('express');
+// const app = require('express')();
 var socket = require('socket.io');
 var server = require('http').createServer(app);
 
 
 const exphbs = require('express-handlebars');
-// const port = process.env.PORT ;
+// const port = 3000;
 var bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
 // server.listen(port);
 const mongoose = require('mongoose');
+
+
+var express = require('express');
+var app = express();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+var PORT = process.env.PORT || 3000;
 
 // models
 const voorkeurmod = require('./models/voorkeur');
@@ -57,8 +64,7 @@ app.set("view engine", 'handlebars');
 
 //socket setup
 // var io = socket(server);
-io = require('socket.io').listen(server)
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
   console.log('made the socket connection');
 
   //luistert naar de client side of daar een chat bericht van verstuurd wordt
@@ -312,4 +318,6 @@ app.use(function (req, res) {
   res.status(404).send("Sorry this page doesn't exist, try another one");
 });
 
-app.listen(process.env.PORT || 3000);
+http.listen(PORT,function(){
+  console.log("Listening to port " + PORT);
+});
