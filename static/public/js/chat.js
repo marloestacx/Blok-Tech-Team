@@ -1,5 +1,12 @@
 //Maak connectie met server-side socket.io
-var socket = io.connect('http://localhost:3000');
+var socket = io.connect(process.env.PORT);
+
+var HOST = location.origin.replace(/^http/, 'ws')
+var ws = new WebSocket(HOST);
+var el = document.getElementById('server-time');
+ws.onmessage = function (event) {
+  el.innerHTML = 'Server time: ' + event.data;
+};
 
 // Query DOM
 var bericht = document.getElementById('bericht');
