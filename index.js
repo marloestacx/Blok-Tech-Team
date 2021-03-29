@@ -312,4 +312,4 @@ app.use(function (req, res) {
   res.status(404).send("Sorry this page doesn't exist, try another one");
 });
 
-server.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 3000);
