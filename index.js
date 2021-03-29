@@ -56,7 +56,7 @@ app.set("view engine", 'handlebars');
 
 
 //socket setup
-const io = socketIO(server);
+const io = socket(server);
 io.on('connection', function(socket) {
   console.log('made the socket connection');
 
