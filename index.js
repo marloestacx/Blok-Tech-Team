@@ -11,12 +11,12 @@ const dotenv = require('dotenv').config();
 // server.listen(port);
 const mongoose = require('mongoose');
 
-
 var express = require('express');
-var app = express();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
-var PORT = process.env.PORT || 3000;
+    app = express();
+    server = require('http').createServer(app);
+    io = require('socket.io').listen(server);
+
+
 
 // models
 const voorkeurmod = require('./models/voorkeur');
@@ -64,7 +64,7 @@ app.set("view engine", 'handlebars');
 
 //socket setup
 // var io = socket(server);
-io.on('connection', function(socket) {
+io.sockets.on('connection', function(socket) {
   console.log('made the socket connection');
 
   //luistert naar de client side of daar een chat bericht van verstuurd wordt
@@ -318,6 +318,4 @@ app.use(function (req, res) {
   res.status(404).send("Sorry this page doesn't exist, try another one");
 });
 
-http.listen(PORT,function(){
-  console.log("Listening to port " + PORT);
-});
+server.listen(process.env.PORT || 3000);
