@@ -5,10 +5,10 @@ var server = require('http').createServer(app);
 
 
 const exphbs = require('express-handlebars');
-const port = 3000;
+// const port = 3000;
 var bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
-server.listen(port);
+// server.listen(process.env.PORT);
 const mongoose = require('mongoose');
 
 // models
@@ -311,6 +311,6 @@ app.use(function (req, res) {
   res.status(404).send("Sorry this page doesn't exist, try another one");
 });
 
-app.listen(process.env.PORT || 3000, () => {
+server.listen(process.env.PORT || 3000, () => {
   console.log('Express web app on localhost:3000');
 });
