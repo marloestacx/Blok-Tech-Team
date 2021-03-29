@@ -1,12 +1,5 @@
 //Maak connectie met server-side socket.io
-var socket = io.connect(process.env.PORT);
-
-var HOST = location.origin.replace(/^http/, 'ws')
-var ws = new WebSocket(HOST);
-var el = document.getElementById('server-time');
-ws.onmessage = function (event) {
-  el.innerHTML = 'Server time: ' + event.data;
-};
+var socket = io.connect('https://blok-tech-team.herokuapp.com');
 
 // Query DOM
 var bericht = document.getElementById('bericht');
