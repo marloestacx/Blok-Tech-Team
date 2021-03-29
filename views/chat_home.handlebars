@@ -1,0 +1,39 @@
+<div id="chat_home">
+	{{#each profiel}}
+	<section class="profile_box">
+		<img src={{this.afbeelding}}>
+		<div id="profile_info">
+			<p>{{this.naam}}</p>
+			<p>{{this.leeftijd}}</p>
+		</div>
+		<div class="icon_box">
+			<a href="chat"><img src="public/images/chat.svg" id="chat_icon" alt=""></a>
+			<button id=""><img src="public/images/close.svg" id="close_icon" alt=""></button>
+		</div>
+	</section>
+	{{/each}}
+
+	{{!-- <section class="profile_box">
+		<img src="public/images/pexels-photo-220453.jpeg" class="profile_pic"```````````>
+		<div>
+			<p>Jack</p>
+			<p>Rocket league, Call of duty 2</p>
+		</div>
+		<div>
+			<a href=""><img src="public/images/chat.svg" id="chat_icon" alt=""></a>
+			<button id=""><img src="public/images/close.svg" id="close_icon" alt=""></button>
+		</div>
+	</section>
+
+	<section class="profile_box">
+		<img src="public/images/elizabeth.jpg" class="profile_pic">
+		<div>
+			<p>Lara</p>
+			<p>Rocket league, Call of duty 2</p>
+		</div>
+		<div>
+			<a href=""><img src="public/images/chat.svg" id="chat_icon" alt=""></a>
+			<button id=""><img src="public/images/close.svg" id="close_icon" alt=""></button>
+		</div>
+	</section> --}}
+</div>

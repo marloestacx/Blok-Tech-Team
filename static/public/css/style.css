@@ -20,7 +20,6 @@ body {
     height: 100%;
 }
 header {
-    background-color: #257EBB;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -29,6 +28,8 @@ header {
 
 header h1 {
     width: 50%;
+    color: #257EBB;
+    padding: 0.5em 0;
 }
 
 main {
@@ -39,12 +40,20 @@ main {
     padding-bottom: 100px;
 }
 
-a.button {
+a.button, button, .button{
     background-color: #287CB9;
     color: white;
-    padding: 7px;
-    border-radius: 20px;
     width: max-content;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 10px;
+    font-size: 1em;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /*navigatie fixed*/
@@ -55,22 +64,22 @@ nav{
 }
 
 nav ul{
-        display: flex;
+    display: flex;
     justify-content: space-between;
 }
 
 nav ul li{
-display: flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 nav ul li img {
-   height: 2em;
+    height: 2em;
 }
 
 nav ul li:hover img, .current {
-filter: invert(43%) sepia(25%) saturate(1279%) hue-rotate(161deg) brightness(97%) contrast(100%);
+    filter: invert(43%) sepia(25%) saturate(1279%) hue-rotate(161deg) brightness(97%) contrast(100%);
 }
 
 #main_nav {
@@ -91,6 +100,7 @@ main #chat #result {
     align-items: center;
     padding-top: 0.5em;
     margin-bottom: 1em;
+    text-align: center;
 }
 
 main #chat .chat_msg {
@@ -218,8 +228,13 @@ main #chat #msg2::before { /*https://codingislove.com/css-speech-bubbles/*/
     background-color: #EB0C0C;
 }
 
+#chat_footer {
+    min-height: 3em;
+    background-color: white;
+}
+
 #chat_footer, #add_footer {
-    position: absolute;
+    position: fixed;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -230,16 +245,17 @@ main #chat #msg2::before { /*https://codingislove.com/css-speech-bubbles/*/
 }
 
 #chat_footer a img {
-    width: 3em;
+    width: 2em;
+    margin: 0em 0.5em;
 }
 
-#chat_footer form {
+#chat_footer section {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#chat_footer form input:first-of-type {
+#chat_footer section input:first-of-type {
     border: 1px solid black;
     width: 20em;
     margin-right: 1em;
@@ -248,13 +264,15 @@ main #chat #msg2::before { /*https://codingislove.com/css-speech-bubbles/*/
     border-radius: 1em;
 }
 
-#chat_footer form #submitText {
+#chat_footer section #submitText {
     border: none;
-    background-image: url(../images/send.png);
+    background-image: url(../images/paper-plane-solid.svg);
     background-repeat: no-repeat;
-    background-size: 30px;
-    width: 30px;
-    height: 30px;
+    background-size: 2em;
+    width: 2em;
+    height: 2em;
+    background-color: transparent;
+    padding: 0;
 }
 #add_header, #add_footer {
     height: 10%;
@@ -282,7 +300,7 @@ main #chat #msg2::before { /*https://codingislove.com/css-speech-bubbles/*/
     border: none;
 }
 
-#vraagform button {
+#vraagform button{
     border-radius: 2em;
     border: 1px solid black;
     margin-top: 01em;
@@ -293,59 +311,307 @@ main #chat #msg2::before { /*https://codingislove.com/css-speech-bubbles/*/
 
 /*Profiel pagina*/
 section#profiel {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+}
+
+section#profiel img {
+    border-radius: 50%;
+    width: 100%;
+}
+
+
+section#profiel p {
+    grid-column: 2;
+align-self: center;
+}
+
+section#games{
     display: flex;
     flex-direction: column;
         gap: 10px;
 }
 
-section#movies{
-    display: flex;
-    flex-direction: column;
-        gap: 10px;
-}
-
-section#movies ul {
+section#games ul {
 display: flex;
     gap: 10px;
 }
 
-section#movies li {
+section#games li {
     list-style: none;
        width: 30vw;
 }
-section#movies img {
+section#games img {
  width: 100%;
 }
 
-/*add movie select movie*/
-section#addMovies ul {
+/*add game select game*/
+section#addGames {
     display: flex;
-    list-style: none;
+    flex-direction: column;
+    gap: 20px;
 }
 
-section#addMovies ul li {
+section#addGames ul {
+    display: grid;
+    list-style: none;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+section#addGames ul li {
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
+        text-align: center;
+    gap: 8px;
+    position: relative;
 }
 
-section#addMovies ul li img {
-    width: 33%;
+section#addGames ul li input[type="checkbox"] {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
 }
 
+section#addGames ul li img {
+    width: 100%;
+}
 
+section#addGames label {
+    text-align: -webkit-center;
+}
+
+section#addGames h3 {
+    font-size: 15px;
+    min-height: 40px;
+}
 
 #add_footer {
     display: flex;
     justify-content: center;
 }
 
-#ice_button {
+
+/* Login pagina */
+#login_pagina{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#login_pagina h1{
+    font-size: 40px;
+    border-bottom: 6px solid #257EBB;
+    margin-bottom: 50px;
+    padding: 13px 0;
+}
+
+
+.login_container{
+    width: 360px;
+    height: 420px;
+    margin-top: 4em;
+    background: #000;
+    color: #fff;
+    display: flex;
     position: absolute;
+    box-sizing: border-box;
+    align-items: center;
+    background-color: gray;
+    flex-direction: column;
+    padding: 2em;
+
+}
+
+#login_pagina form{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 0 15%;
+}
+
+#login_pagina form .button, #login_pagina form #login_naam, #login_pagina form #login_password{
+    width: 100%;
+}
+
+#login_rememberme{
+    height: 28px;
+    width: 28px;
+}
+
+/* #login_pagina form *  */
+#rememberme{
+    display: inline-flex;
+    width: auto;
+}
+
+
+#icon_user{
+    width: 28px;
+    height: 28px; 
+    background-image: url('../images/default/1x/login/sprite-sd716acf281.png');
+    background-position: 0 0;
+}
+
+.button{
+    color: white;
+    padding: 7px;
+    border-radius: 20px;
+    width: max-content;
+    border: none;
+    background-color: #257EBB;
+    text-align: center;
+}
+
+/* Chat Home Pagina */
+#chathome{
+    width: 375px;
+    display: flex; 
+}
+
+
+#profileimage {
+    width: 100%;
+    border-radius: 50%;
+}
+
+.match a img{
+    max-height: 2em;
+}
+
+fieldset {
+    border: 0;
+}
+
+.match article{
+    margin: 0.5em;
+    padding: 1em;
+}
+
+.filter {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.match a img{
+    max-height: 2em;
+}
+
+.match {
+    padding: 0 0 5em 0;
+}
+
+ 
+  .icon_box{
+    display: flex;
+    flex-direction: column;
+}
+
+
+#close_icon{
+    width: 50px;
+    height: 50px;
+    filter: invert(13%) sepia(98%) saturate(4968%) hue-rotate(359deg) brightness(95%) contrast(94%);
+}
+
+#chat_icon{
+    width: 50px;
+    height: 50px;
+    filter: invert(43%) sepia(25%) saturate(1279%) hue-rotate(161deg) brightness(97%) contrast(100%);
+}
+
+#chat_home button{
+    border: none;
+    background-color: white;
+}
+
+.profile_pic{
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+}
+
+.profile_box{
+    display: flex;
+    margin: 2em;
+    padding-bottom: 1em;
+    border-bottom: #000 1px solid;
+    gap: 40px;
+}
+
+.profile_box img {
+    width: 90px;
+    height: 90px;
+}
+
+#profile_info{
+    align-self: center;
+}
+
+.match div{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.match div img{
+    border-radius: 200px;
+    padding: 0.5em;
+    max-height: 5em;
+    margin: 1em;
+    width: 5em;
+} 
+
+#ice_button {
+    position: fixed;
     bottom: 10%;
     left: 30%;
     padding: 0.5em;
     background-color: #257EBB;
     border-radius: 1.5em;
     color: white;
+}
+
+#chat_header, #add_header {
+    background-color: #257EBB;
+}
+
+#chat_header h1, #add_header h1 {
+    color: black;
+    text-align: center;
+    padding: 0.25em 0em;
+}
+
+.nieuwBericht {
+    background-color: #257EBB;
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+.nieuwBericht::before { /*https://codingislove.com/css-speech-bubbles/*/
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #257EBB;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #257EBB;
+    border-bottom: 10px solid transparent;
+    bottom: -12px;
+    left: 8px;
+}
+
+#bericht, #submitText {
+    outline: none;
+}
+
+#chat_main {
+    padding: 1.5em;
+    padding-bottom: 3em;
 }

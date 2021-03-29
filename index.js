@@ -1,65 +1,52 @@
 const express = require('express');
+const app = require('express')();
+var socket = require('socket.io');
+var server = require('http').createServer(app);
+
+
 const exphbs = require('express-handlebars');
-const app = express();
 const port = 3000;
 var bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
-// const { MongoClient } = require('mongodb');
+server.listen(port);
+const mongoose = require('mongoose');
 
-// Connect database with .env username and password
-var { MongoClient } = require("mongodb");
+// models
+const voorkeurmod = require('./models/voorkeur');
+const profielmod = require('./models/profiel');
+const peoplemod = require('./models/people');
+const vraagmod = require('./models/vragen');
+const matchesmod = require('./models/matches');
+
+// Mongodb gebruiken
+const MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
-var client = new MongoClient(process.env.DB_URI);
 
-// Get info from database
-var db;
-// collection people
+// collection personen
 var col;
-// Person info
-var person;
-// collection movies
-var colm;
-// Movie info
-var movie;
-// After login get currrentUser id
+// after login pak de currrentUser id
 var currrentUser;
-// list of movies
-var movies;
-// get curent user favorite moviename
-var usermovies;
 
-// function connectDB
-async function connectDB() {
-    // Get data from database
-    await client.connect();
+// database connectie met mongoose
+mongoose.connect(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', async function() {
     console.log("Connected correctly to server");
-    db = await client.db(process.env.DB_NAME);
-    col = db.collection("people");
+    col = peoplemod;
     person = await col.findOne();
-    colm = db.collection("movies");
-    movie = await colm.findOne();
     currrentUser = "603fb9c67d5fab08997fc484";
-    movies = await colm.find({}, { }).toArray();
-}
-connectDB()
-.then(() => {
-  // if the connection was successfull, show:
-  console.log("we have landed");
-})
-.catch ( error => {
-  // if the connection fails, send error message
-  console.log(error);
 });
 
-// a little array to mimic real accounts
-// const person = [
-//   {"id": 14256, "naam": "Bert"},
-//   {"id": 987643, "naam": "Maaike"}
-// ];
+// array met accounts
+const fakeperson = [
+  {"id": 14256,"naam": "Bert"},
+  {"id": 987643,"naam": "Maaike"}
+];
+
 const geslacht = ["man","vrouw"];
 const leeftijd = ["20-30", "30-40", "40-50", "50+"];
-const gebruiker = 2;
-
+const platform = ["PC", "Playstation", "Xbox"];
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static('static'));
@@ -67,125 +54,210 @@ app.use(express.static('static'));
 app.engine('handlebars', exphbs());
 app.set("view engine", 'handlebars');
 
-app.get('/', async (req, res) => {
+
+//socket setup
+var io = socket(server);
+io.on('connection', function(socket) {
+  console.log('made the socket connection');
+
+  //luistert naar de client side of daar een chat bericht van verstuurd wordt
+  socket.on('chat', function(data){
+    //stuurt het bericht door naar alle clients die gekoppeld zijn aan dezelfde room
+    io.sockets.emit('chat', data);
+  });
+});
+
+
+app.get('/match', async (req, res) => {
   let profielen = {}
 
   // haalt je voorkeur uit de database
-  db.collection('voorkeur').findOne({id: gebruiker}, async function(err, result) {
+    await voorkeurmod.findOne({id: currrentUser}, async function(err, result) {
     if (err) throw err;
-    // filter op geslacht en leeftijd
-    const filter = {geslacht: result.geslacht, leeftijdcategory: result.leeftijd}; 
+    // filter op geslacht, leeftijd en platform
+    const filter = {geslacht: result.geslacht, leeftijdcategory: result.leeftijd, platform: result.platform}; 
     // haalt alle profielen de voldoen aan het filter uit de database op en stopt ze in een array
-    profielen = await db.collection('profielen').find(filter).toArray();
+    // https://stackoverflow.com/a/59759088
+    profielen = await profielmod.find(filter).lean();
     const match = 'current';
     res.render('home', {profielen, match})
   });
 });
 
-// When going to profiel.html when node is running your wil be redirected to a dynamic template
+// Wanneer je naar profiel.html gaat, runt node en wordt je geredirect naar een dynamische template
+
+//////////// Dit zijn de profiel pagina's gemaakt door tim //////////////
+
+// functie die de favoritegames update
+async function updateGames(req, res, change){
+    // games in een array zetten
+  const str = req.body.gameNaam.toString();
+  const arrayofgames = str.split(",");
+
+  // loop door alle games in array en plaats ze elke keer in database.
+  for (i = 0; i < arrayofgames.length; i++) {
+
+    if(req.body.gameNaam != null || arrayofgames[i] != "test" ){
+
+      if(change == "add"){
+        await col.updateOne(
+          { _id: ObjectId(currrentUser) },
+          {$addToSet: {favoritegames: arrayofgames[i]}}
+        )
+      }
+
+      if(change == "remove"){
+        await col.updateOne(
+          { _id: ObjectId(currrentUser) },
+          {$pull:{favoritegames: arrayofgames[i]}}
+        )
+      }
+    }
+  }
+
+  // Stuur naar overzichtGames
+  res.redirect('/overzichtGames');
+}
+
+// profiel overzicht pagina
+
 app.get('/profiel', async (req, res) => {
 
-  var person = await col.findOne();
-  var favoritemovies = (person.favoritemovies );
-
-  console.log(favoritemovies);
+  // Opvragen informatie persoon
+  const persoon = await col.findOne();
+  
+  // footer weet nu op welke pagina je bent
   const profielpagina = 'current';
 
+  // rendert het template profiel
   res.render('profiel', {
-      name: person.name,
-      age: person.age,
-      movies: movies,
-      favoritemovies: favoritemovies,
+      name: persoon.name,
+      age: persoon.age,
+      favoritegames: persoon.favoritegames,
       profielpagina
   })
 
 });
 
-// Render template changeinfo with database values 
-app.get('/changeinfo', async (req, res) => {
 
-  await client.connect();
-  res.render('changeinfo', {
-      name: person.name,
-      age: person.age
+// 
+
+// const profielChat = [
+//   {"naam": "Sarah",
+//   "games": "Rocket league"},
+  
+//   {"naam": "Jack","games": "Rocket league"},
+//   {"naam": "Mara","games": "Rocket league"}
+// ];
+
+
+app.get('/chat_home', async (req, res) => {
+  var profielChat = await profielmod.find().lean();
+  res.render('chat_home', {
+    profiel: profielChat
+  })
+  console.log (profielChat);
+});
+
+app.get('/', async (req, res) => {
+
+  
+    res.render('login', {
+
+    })
+  
+  });
+
+
+// Persoonlijke informatie gebruiker
+app.get('/overzichtPersoon', async (req, res) => {
+
+
+  // Opvragen informatie persoon
+  const persoon = await col.findOne();
+
+  // rendert het template overzichtPersoon
+  res.render('overzichtPersoon', {
+      name: persoon.name,
+      age: persoon.age
   })
 });
 
 // Update name and age from database and render template again
-app.post('/bedankt2', async (req, res) => {
+app.post('/overzichtPersoon', async (req, res) => {
   
+  // Updaten van currrentUser
+  await col.updateOne(
+      { _id: ObjectId(currrentUser) },
+      {$set: { name: req.body.name, age: req.body.age}}
+    )
+  // Stuur naar overzichtPersoon
+  res.redirect('/overzichtPersoon');
 
-  col.updateOne(
- { _id: ObjectId(currrentUser) },
- {
-   $set: {
-     name: req.body.name,
-     age: req.body.age
-   }
- }
-)
+});
 
-  res.render('changeinfo', {
-      name: req.body.name,
-      age: req.body.age
+
+// Render template met games naam en image url
+app.get('/overzichtGames', async (req, res) => {
+
+  // Verbinden met het cms
+  const sanityClient = require('@sanity/client')
+  const client2 = sanityClient({
+    projectId: '5wst6igf',
+    dataset: 'production',
+    token: '', // of laat leeg om een verborgen gebruiker te zijn
+    useCdn: true // `false` als je nieuwe verse data wilt krijgen
+  })
+
+  var cmsgames;
+
+  // Data ophalen uit het cms met query
+  const query = "*[_type == 'games']{name, 'posterUrl': poster.asset->url}"
+
+  // verander variable naar die van de database
+  await client2.fetch(query).then(games => {
+    cmsgames = games;
+  })
+
+  // Opvragen informatie persoon
+  const persoon = await col.findOne();
+
+  // rendert het template overzichtPersoon
+  res.render('overzichtGames', {
+      games: cmsgames,
+      favoritegames: persoon.favoritegames
   })
 
 });
 
 
-// Render template with movies name and image url
-app.get('/changemovie', async (req, res) => {
+// Toevoegen van game in persoon
+app.post('/toevoegenGame', async (req, res) => {
 
-  var person = await col.findOne();
-  var favoritemovies = (person.favoritemovies );
-
-  res.render('changemovie', {
-      movies: movies,
-      favoritemovies: favoritemovies
-  })
+  updateGames(req, res, "add");
 });
 
+// verwijder game van de database met een form
+app.post('/verwijderGame', async (req, res) => {
 
-// Add movie to database with form
-app.post('/addmovie', async (req, res) => {
-
-  col.updateOne(
- { _id: ObjectId(currrentUser) },
- {
-   $addToSet: {
-     favoritemovies: req.body.moviename
-   }
- }
-)
-
-  res.redirect('/changemovie');
+  updateGames(req, res, "remove");
 
 });
 
-// Remove movie from database with form
-app.post('/removemovie', async (req, res) => {
-
-
-  col.update(
-{ _id: ObjectId(currrentUser) },
-{$pull: { favoritemovies: req.body.moviename }}
-)
-
-     res.redirect('/changemovie');
-});
+/////////// Einden van profiel pagina's /////////
 
 
 app.get('/q&a', async (req, res) => {
   var vragen = [];
-  //takes all the questions from the database and places them into the array vragen
-  vragen = await db.collection('vragen').find({}).toArray();
-  //picks 5 random questions from vragen
+  //Neemt alle vragen van de database en plaatst ze in de array vragen
+  vragen = await vraagmod.find({}).lean();
+  //Kiest 5 random vragen van de array vragen
   const randVraag = [];
-  // vraagHolder is a holder for a single question to test if they are already in the new array randVraag
+  // vraagHolder is een holder voor een enkele vraag om te testen of deze al in de nieuwe array randVraag staat
   var vraagHolder = "";
   while (randVraag.length < 5) {
     vraagHolder = (vragen[Math.floor(Math.random() * vragen.length)]); 
-    //if the question in vraagHolder isn't in the new array, push them to the array
+    //als de nieuwe vraag in vraagHolder, niet in de nieuwe array staat, push hem dan naar de nieuwe array.
     if(!randVraag.includes(vraagHolder)){
       randVraag.push(vraagHolder);
     }
@@ -194,12 +266,11 @@ app.get('/q&a', async (req, res) => {
 });
 
 app.post('/q&a', async (req,res) => {
-  //pushes chosen answers to the database with the id's from the users
-  const questAndAnswer = {"person1": person[0].id, "ansPerson1": req.body.answer, "person2": person[1].id, "ansPerson2": req.body.answer};
-  console.log(req.body.answer);
-  await db.collection('matches').insertOne(questAndAnswer)
+  //stuurt de gekozen antwoorden via de model naar de databasepushes chosen answers to the database with the id's from the users
+  const questAndAnswer = {"person1": fakeperson[0].id, "ansPerson1": req.body.answer, "person2": fakeperson[1].id, "ansPerson2": req.body.answer};
+  await matchesmod.create(questAndAnswer)
   .then(function() { 
-    // redirects the user to a new view
+    // redirects de gebruiker naar een nieuwe view
     res.redirect('/chat');
 }).catch(function(error){
     res.send(error);
@@ -209,8 +280,8 @@ app.post('/q&a', async (req,res) => {
 
 
 app.get('/chat', async (req, res) => {
-  // takes the last match and sets it into an array
-  var lastItem = await db.collection('matches').find().limit(1).sort({$natural:-1}).toArray();
+  // pakt de laatste match aan antwoorden en zet ze in een array
+  var lastItem = await matchesmod.find().limit(1).sort({$natural:-1}).lean();
 res.render('chat', {lastItem, layout: 'chat_layout.handlebars'});
 });
 
@@ -219,20 +290,21 @@ res.render('chat', {lastItem, layout: 'chat_layout.handlebars'});
 });
 
 app.post('/vragen', async (req,res) => {
-  // takes the info given in the view form and places it into the database
+  // pakt de info die gegeven is in de view en plaatst het via de model in de database
   const Addvragen = {"vraag": req.body.vraag, "ant1": req.body.answer1, "ant2": req.body.answer2};
-  await db.collection('questions').insertOne(Addvragen);
+  await vraagmod.create(Addvragen);
   res.render('add', {Addvragen, layout: 'addlayout.handlebars'})
 });
 
 app.get('/filter', (req, res) => {
-  res.render('filter',{geslacht, leeftijd});
+  res.render('filter',{geslacht, leeftijd, platform});
 });
 
 app.post('/filter', async (req,res) => {
   // update voorkeur in de database
-  await db.collection("voorkeur").findOneAndUpdate({ id: gebruiker },{ $set: {"geslacht": req.body.geslacht, "leeftijd": req.body.leeftijd }},{ new: true, upsert: true, returnOriginal: false })
-  res.redirect('/')
+  // https://poopcode.com/mongoerror-the-update-operation-document-must-contain-atomic-operators-how-to-fix/
+  await voorkeurmod.findOneAndUpdate({ id: currrentUser },{ $set: {"geslacht": req.body.geslacht, "leeftijd": req.body.leeftijd, "platform": req.body.platform  }},{ new: true, upsert: true, returnOriginal: false })
+  res.redirect('/match')
 });
 
 app.use(function (req, res) {
