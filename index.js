@@ -1,22 +1,15 @@
-// const express = require('express');
-// const app = require('express')();
+const express = require('express');
+const app = require('express')();
 var socket = require('socket.io');
 var server = require('http').createServer(app);
 
 
 const exphbs = require('express-handlebars');
-// const port = 3000;
+const port = 3000;
 var bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
-// server.listen(port);
+server.listen(port);
 const mongoose = require('mongoose');
-
-var express = require('express');
-    app = express();
-    server = require('http').createServer(app);
-    io = require('socket.io').listen(server);
-
-
 
 // models
 const voorkeurmod = require('./models/voorkeur');
@@ -63,8 +56,8 @@ app.set("view engine", 'handlebars');
 
 
 //socket setup
-// var io = socket(server);
-io.sockets.on('connection', function(socket) {
+const io = socketIO(server);
+io.on('connection', function(socket) {
   console.log('made the socket connection');
 
   //luistert naar de client side of daar een chat bericht van verstuurd wordt
@@ -318,4 +311,6 @@ app.use(function (req, res) {
   res.status(404).send("Sorry this page doesn't exist, try another one");
 });
 
-server.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 3000, () => {
+  console.log('Express web app on localhost:3000');
+});
